@@ -37,6 +37,7 @@
     self.textField = [[UITextField alloc] init];
     self.textField.borderStyle = UITextBorderStyleRoundedRect;
     self.textField.delegate = self;
+    self.textField.keyboardType = UIKeyboardTypeNumberPad;
     self.textField.placeholder = @"Enter your card number here";
     
     [self addSubview:self.textField];
