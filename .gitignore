@@ -1,0 +1,8 @@
+# Build folders
+/build
+/App1/build
+
+# Xcode workspace folders
+xcuserdata
+/Index/
+/Pods/
