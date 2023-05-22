@@ -16,7 +16,7 @@
 @implementation CardNumberTextField
 
 - (NSString *)cardNumber {
-    return self.textField.text;
+    return [self.textField.text stringByReplacingOccurrencesOfString:@" " withString:@""];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
@@ -59,12 +59,39 @@
 
 # pragma mark - UITextFieldDelegate methods
 
+// TODO: Limit the input to 16 digits maximum
 - (BOOL)            textField:(UITextField *)textField
 shouldChangeCharactersInRange:(NSRange)range
             replacementString:(NSString *)string {
-    // TODO: Add a space after fourth digit
-    // TODO: Limit the input to 16 digits maximum
-    return YES;
+    
+    NSString *modifiedText = [textField.text stringByReplacingCharactersInRange:range withString:string];
+    
+    NSString *modifiedTextWithoutSpaces = [modifiedText stringByReplacingOccurrencesOfString:@" " withString:@""];
+    
+    NSString *formattedText = [self formatCreditCardNumber:modifiedTextWithoutSpaces];
+    
+    if ([modifiedText isEqualToString:formattedText]) {
+        return YES;
+    } else {
+        textField.text = formattedText;
+        return NO;
+    }
+}
+
+# pragma mark - Private methods
+
+- (NSString *)formatCreditCardNumber:(NSString *) cardNumber {
+    NSMutableString *mutableString = [NSMutableString string];
+    
+    for (NSUInteger i = 0; i < [cardNumber length]; i++) {
+        if (i > 0 && i % 4 == 0) {
+            [mutableString appendString:@" "];
+        }
+        unichar c = [cardNumber characterAtIndex:i];
+        [mutableString appendString:[[NSString alloc] initWithCharacters:&c length:1]];
+    }
+    
+    return mutableString;
 }
 
 @end

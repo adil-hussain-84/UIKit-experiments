@@ -27,7 +27,7 @@
     NSString *message;
     
     if (cardNumber.length > 0) {
-        message = [NSString stringWithFormat:@"Your card number is %@", cardNumber];
+        message = [NSString stringWithFormat:@"Your card number without spaces is %@.", cardNumber];
     } else {
         message = @"You have not entered a card number.";
     }
