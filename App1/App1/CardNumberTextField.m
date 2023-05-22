@@ -7,7 +7,7 @@
 
 #import "CardNumberTextField.h"
 
-@interface CardNumberTextField ()
+@interface CardNumberTextField () <UITextFieldDelegate>
 
 @property(nonnull, nonatomic) UITextField *textField;
 
@@ -36,6 +36,7 @@
 - (void)initialiseViews {
     self.textField = [[UITextField alloc] init];
     self.textField.borderStyle = UITextBorderStyleRoundedRect;
+    self.textField.delegate = self;
     self.textField.placeholder = @"Enter your card number here";
     
     [self addSubview:self.textField];
@@ -53,6 +54,16 @@
 
 - (CGSize)intrinsicContentSize {
     return [_textField intrinsicContentSize];
+}
+
+# pragma mark - UITextFieldDelegate methods
+
+- (BOOL)            textField:(UITextField *)textField
+shouldChangeCharactersInRange:(NSRange)range
+            replacementString:(NSString *)string {
+    // TODO: Add a space after fourth digit
+    // TODO: Limit the input to 16 digits maximum
+    return YES;
 }
 
 @end
