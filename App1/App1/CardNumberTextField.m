@@ -40,6 +40,8 @@
     self.textField.keyboardType = UIKeyboardTypeNumberPad;
     self.textField.placeholder = @"Enter your card number here";
     
+    [self.textField addTarget:self action:@selector(editingChanged) forControlEvents:UIControlEventEditingChanged];
+    
     [self addSubview:self.textField];
     
     self.translatesAutoresizingMaskIntoConstraints = false;
@@ -59,7 +61,6 @@
 
 # pragma mark - UITextFieldDelegate methods
 
-// TODO: Limit the input to 16 digits maximum
 - (BOOL)            textField:(UITextField *)textField
 shouldChangeCharactersInRange:(NSRange)range
             replacementString:(NSString *)string {
@@ -68,17 +69,29 @@ shouldChangeCharactersInRange:(NSRange)range
     
     NSString *modifiedTextWithoutSpaces = [modifiedText stringByReplacingOccurrencesOfString:@" " withString:@""];
     
-    NSString *formattedText = [self formatCreditCardNumber:modifiedTextWithoutSpaces];
-    
-    if ([modifiedText isEqualToString:formattedText]) {
+    if (modifiedTextWithoutSpaces.length <= 16) {
         return YES;
     } else {
-        textField.text = formattedText;
         return NO;
     }
 }
 
 # pragma mark - Private methods
+
+- (void)editingChanged {
+    NSString *text = self.textField.text;
+    
+    NSString *textWithoutSpaces = [text stringByReplacingOccurrencesOfString:@" " withString:@""];
+    
+    NSString *formattedText = [self formatCreditCardNumber:textWithoutSpaces];
+    
+    if ([text isEqualToString:formattedText]) {
+        // nothing do; keep the text as it is
+        return;
+    }
+    
+    self.textField.text = formattedText;
+}
 
 - (NSString *)formatCreditCardNumber:(NSString *) cardNumber {
     NSMutableString *mutableString = [NSMutableString string];
