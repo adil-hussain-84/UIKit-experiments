@@ -5,7 +5,7 @@
 //  Created by Adil Hussain on 17/05/2023.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 #import "AppDelegate.h"
 
 int main(int argc, char * argv[]) {

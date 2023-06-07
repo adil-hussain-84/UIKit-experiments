@@ -7,12 +7,8 @@
 
 @import UIKit;
 
-NS_ASSUME_NONNULL_BEGIN
-
 @interface CardNumberTextField : UIView
 
 @property(nonnull, nonatomic, readonly, copy) NSString *cardNumber;
 
 @end
-
-NS_ASSUME_NONNULL_END

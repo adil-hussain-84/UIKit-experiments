@@ -6,18 +6,26 @@
 //
 
 #import "CardNumberTextField.h"
+#import "CursorPositionCalculator.h"
 
 @interface CardNumberTextField () <UITextFieldDelegate>
 
 @property(nonnull, nonatomic) UITextField *textField;
 
+@property(nonnull, nonatomic, copy) NSCharacterSet *allowedCharacterSet;
+@property(nonatomic) int maxLength;
+
 @end
 
 @implementation CardNumberTextField
 
+# pragma mark - Public methods
+
 - (NSString *)cardNumber {
     return [self.textField.text stringByReplacingOccurrencesOfString:@" " withString:@""];
 }
+
+# pragma mark - Initialisation methods
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder {
     if (self = [super initWithCoder:aDecoder]) {
@@ -34,6 +42,9 @@
 }
 
 - (void)initialiseViews {
+    self.allowedCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789 "];
+    self.maxLength = 16;
+    
     self.textField = [[UITextField alloc] init];
     self.textField.borderStyle = UITextBorderStyleRoundedRect;
     self.textField.delegate = self;
@@ -55,6 +66,8 @@
     ]];
 }
 
+# pragma mark - UIView methods
+
 - (CGSize)intrinsicContentSize {
     return [_textField intrinsicContentSize];
 }
@@ -65,11 +78,15 @@
 shouldChangeCharactersInRange:(NSRange)range
             replacementString:(NSString *)string {
     
+    if (![self textContainsDigitsOnly:string]) {
+        return NO;
+    }
+    
     NSString *modifiedText = [textField.text stringByReplacingCharactersInRange:range withString:string];
     
     NSString *modifiedTextWithoutSpaces = [modifiedText stringByReplacingOccurrencesOfString:@" " withString:@""];
     
-    if (modifiedTextWithoutSpaces.length <= 16) {
+    if (modifiedTextWithoutSpaces.length <= self.maxLength) {
         return YES;
     } else {
         return NO;
@@ -80,17 +97,40 @@ shouldChangeCharactersInRange:(NSRange)range
 
 - (void)editingChanged {
     NSString *text = self.textField.text;
-    
     NSString *textWithoutSpaces = [text stringByReplacingOccurrencesOfString:@" " withString:@""];
     
     NSString *formattedText = [self formatCreditCardNumber:textWithoutSpaces];
+    NSUInteger formattedTextLength = formattedText.length;
     
     if ([text isEqualToString:formattedText]) {
         // nothing do; keep the text as it is
         return;
     }
     
-    self.textField.text = formattedText;
+    UITextPosition *beginningOfDocument = self.textField.beginningOfDocument;
+    UITextRange *selectedTextRange = self.textField.selectedTextRange;
+    
+    NSInteger cursorPositionBefore = [self.textField offsetFromPosition:beginningOfDocument
+                                                             toPosition:selectedTextRange.start];
+    
+    self.textField.text = formattedText; // change the text
+    
+    if (cursorPositionBefore > formattedTextLength) {
+        // nothing further to do; the UITextField will automatically do the right thing of putting the cursor at the end of the text
+        return;
+    }
+        
+    NSString *originalTextUpToCursor = [text substringToIndex:cursorPositionBefore];
+    
+    NSUInteger cursorPositionAfter = [CursorPositionCalculator calculateCursorPositionInFormattedText:formattedText
+                                                               givenOriginalTextUpToOldCursorPosition:originalTextUpToCursor];
+    
+    UITextPosition *textPosition = [self.textField positionFromPosition:beginningOfDocument offset:cursorPositionAfter];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // set the 'selectedTextRange' value on the next UI cycle or otherwise it will have no effect
+        self.textField.selectedTextRange = [self.textField textRangeFromPosition:textPosition toPosition:textPosition];
+    });
 }
 
 - (NSString *)formatCreditCardNumber:(NSString *) cardNumber {
@@ -105,6 +145,16 @@ shouldChangeCharactersInRange:(NSRange)range
     }
     
     return mutableString;
+}
+
+- (BOOL)textContainsDigitsOnly:(NSString *)text {
+    for (int i = 0; i < text.length; i++) {
+        unichar c = [text characterAtIndex:i];
+        if (![self.allowedCharacterSet characterIsMember:c]) {
+            return NO;
+        }
+    }
+    return YES;
 }
 
 @end
