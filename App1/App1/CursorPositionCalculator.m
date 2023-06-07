@@ -12,20 +12,20 @@
 + (NSUInteger)calculateCursorPositionInFormattedText:(NSString *)formattedText
               givenOriginalTextUpToOldCursorPosition:(NSString *)originalText {
     
-    NSUInteger indexInOriginalText = 0;
     NSUInteger indexInFormattedText = 0;
+    NSUInteger indexInOriginalText = 0;
     
-    while (indexInOriginalText < originalText.length && indexInFormattedText < formattedText.length) {
-        unichar characterInOriginalText = [originalText characterAtIndex:indexInOriginalText];
+    while (indexInFormattedText < formattedText.length && indexInOriginalText < originalText.length) {
         unichar characterInFormattedText = [formattedText characterAtIndex:indexInFormattedText];
+        unichar characterInOriginalText = [originalText characterAtIndex:indexInOriginalText];
         
-        if (characterInOriginalText == characterInFormattedText) {
-            indexInOriginalText++;
+        if (characterInFormattedText == characterInOriginalText) {
             indexInFormattedText++;
-        } else if (characterInOriginalText == ' ') {
             indexInOriginalText++;
         } else if (characterInFormattedText == ' ') {
             indexInFormattedText++;
+        } else if (characterInOriginalText == ' ') {
+            indexInOriginalText++;
         }
     }
     
