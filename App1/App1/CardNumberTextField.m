@@ -100,7 +100,6 @@ shouldChangeCharactersInRange:(NSRange)range
     NSString *textWithoutSpaces = [text stringByReplacingOccurrencesOfString:@" " withString:@""];
     
     NSString *formattedText = [self formatCreditCardNumber:textWithoutSpaces];
-    NSUInteger formattedTextLength = formattedText.length;
     
     if ([text isEqualToString:formattedText]) {
         // nothing do; keep the text as it is
@@ -115,11 +114,6 @@ shouldChangeCharactersInRange:(NSRange)range
     
     self.textField.text = formattedText; // change the text
     
-    if (cursorPositionBefore > formattedTextLength) {
-        // nothing further to do; the UITextField will automatically do the right thing of putting the cursor at the end of the text
-        return;
-    }
-        
     NSString *originalTextUpToCursor = [text substringToIndex:cursorPositionBefore];
     
     NSUInteger cursorPositionAfter = [CursorPositionCalculator calculateCursorPositionInFormattedText:formattedText
