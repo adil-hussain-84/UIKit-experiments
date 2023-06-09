@@ -43,7 +43,7 @@
 
 - (void)initialiseViews {
     self.allowedCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789 "];
-    self.maxLength = 16;
+    self.maxLength = 16; // some card numbers can be up to 19 digits but let's gloss over that as an unimportant implementation detail
     
     self.textField = [[UITextField alloc] init];
     self.textField.borderStyle = UITextBorderStyleRoundedRect;
@@ -78,7 +78,7 @@
 shouldChangeCharactersInRange:(NSRange)range
             replacementString:(NSString *)string {
     
-    if (![self textContainsDigitsOnly:string]) {
+    if (![self textContainsAllowedCharactersOnly:string]) {
         return NO;
     }
     
@@ -95,6 +95,10 @@ shouldChangeCharactersInRange:(NSRange)range
 
 # pragma mark - Private methods
 
+/// Formats the text in this view so that a space is added after every fourth digit.
+///
+/// This function takes care to move the cursor in `textField` forward or backward
+/// depending on how many spaces are added or removed to/from the text.
 - (void)editingChanged {
     NSString *text = self.textField.text;
     NSString *textWithoutSpaces = [text stringByReplacingOccurrencesOfString:@" " withString:@""];
@@ -127,6 +131,12 @@ shouldChangeCharactersInRange:(NSRange)range
     });
 }
 
+/// Formats `cardNumber` such that a space is inserted after every fourth digit.
+///
+/// Formatting a card number is actually more complicated than inserting a space after every fourth digit.
+/// This function glosses over this detail because that's not the focus of this `CardNumberTextField` class.
+/// The focus of this `CardNumberTextField` class is the `editingChanged` function
+/// and how to adjust the cursor in the `UITextField` whenever a space is added or removed by the format function.
 - (NSString *)formatCreditCardNumber:(NSString *) cardNumber {
     NSMutableString *mutableString = [NSMutableString string];
     
@@ -141,7 +151,7 @@ shouldChangeCharactersInRange:(NSRange)range
     return mutableString;
 }
 
-- (BOOL)textContainsDigitsOnly:(NSString *)text {
+- (BOOL)textContainsAllowedCharactersOnly:(NSString *)text {
     for (int i = 0; i < text.length; i++) {
         unichar c = [text characterAtIndex:i];
         if (![self.allowedCharacterSet characterIsMember:c]) {
